@@ -4,18 +4,24 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from session_state import SessionState
 
-def extraer_precios(url):
+def extraer_precios(url, num_paginas):
+    productos = []
+    precios = []
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     }
-    respuesta = requests.get(url, headers=headers)
-    sopa = BeautifulSoup(respuesta.content, "html.parser")
 
-    elementos_productos = sopa.find_all("h3", class_="product-name")
-    elementos_precios = sopa.find_all("span", class_="price")
+    for i in range(1, num_paginas + 1):
+        url_pagina = f"{url}?p={i}"
+        respuesta = requests.get(url_pagina, headers=headers)
+        sopa = BeautifulSoup(respuesta.content, "html.parser")
 
-    productos = [elemento.text.strip() for elemento in elementos_productos]
-    precios = [float(elemento.text.strip().replace("Q", "").replace(",", "")) for elemento in elementos_precios]
+        elementos_productos = sopa.find_all("h3", class_="product-name")
+        elementos_precios = sopa.find_all("span", class_="price")
+
+        productos += [elemento.text.strip() for elemento in elementos_productos]
+        precios += [float(elemento.text.strip().replace("Q", "").replace(",", "")) for elemento in elementos_precios]
 
     datos = pd.DataFrame({"producto": productos, "precio": precios})
     return datos
@@ -23,12 +29,13 @@ def extraer_precios(url):
 st.title("Extractor de precios de supermercado")
 
 url = st.text_input("Ingrese la URL del supermercado:", "https://www.latorre.com.gt/")
+num_paginas = st.number_input("Ingrese el número de páginas a extraer:", min_value=1, value=1)
 
 session_state = SessionState.get(datos=None, descargar=False)
 
-if url:
+if url and num_paginas:
     try:
-        datos = extraer_precios(url)
+        datos = extraer_precios(url, num_paginas)
         st.write(datos)
         session_state.datos = datos
 
