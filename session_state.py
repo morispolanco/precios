@@ -3,8 +3,10 @@ class SessionState:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def get(self, key, default=None):
-        return getattr(self, key, default)
+    @classmethod
+    def get(cls, **kwargs):
+        session = cls(**kwargs)
+        return session
 
     def set(self, key, value):
         setattr(self, key, value)
