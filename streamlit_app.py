@@ -5,33 +5,24 @@ import pandas as pd
 from session_state import SessionState
 
 def extraer_precios(url):
-    html_content = """
-    <html>
-        <body>
-            <div class="producto">Producto 1</div>
-            <div class="precio">$10.00</div>
-            <div class="producto">Producto 2</div>
-            <div class="precio">$20.00</div>
-            <div class="producto">Producto 3</div>
-            <div class="precio">$30.00</div>
-        </body>
-    </html>
-    """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    }
+    respuesta = requests.get(url, headers=headers)
+    sopa = BeautifulSoup(respuesta.content, "html.parser")
 
-    sopa = BeautifulSoup(html_content, "html.parser")
-
-    elementos_productos = sopa.find_all("div", class_="producto")
-    elementos_precios = sopa.find_all("div", class_="precio")
+    elementos_productos = sopa.find_all("h3", class_="product-name")
+    elementos_precios = sopa.find_all("span", class_="price")
 
     productos = [elemento.text.strip() for elemento in elementos_productos]
-    precios = [float(elemento.text.strip().replace("$", "")) for elemento in elementos_precios]
+    precios = [float(elemento.text.strip().replace("Q", "").replace(",", "")) for elemento in elementos_precios]
 
     datos = pd.DataFrame({"producto": productos, "precio": precios})
     return datos
 
 st.title("Extractor de precios de supermercado")
 
-url = st.text_input("Ingrese la URL del supermercado:", "")
+url = st.text_input("Ingrese la URL del supermercado:", "https://www.latorre.com.gt/")
 
 session_state = SessionState.get(datos=None, descargar=False)
 
