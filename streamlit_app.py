@@ -23,3 +23,4 @@ datos = pd.DataFrame({"producto": productos, "precio": precios})
 
 # Exportar el DataFrame a un archivo CSV
 datos.to_csv("precios_supermercado.csv", index=False)
+
