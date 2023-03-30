@@ -5,12 +5,21 @@ import pandas as pd
 from session_state import SessionState
 
 def extraer_precios(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
-    }
-    respuesta = requests.get(url, headers=headers)
-    sopa = BeautifulSoup(respuesta.content, "html.parser")
-    
+    html_content = """
+    <html>
+        <body>
+            <div class="producto">Producto 1</div>
+            <div class="precio">$10.00</div>
+            <div class="producto">Producto 2</div>
+            <div class="precio">$20.00</div>
+            <div class="producto">Producto 3</div>
+            <div class="precio">$30.00</div>
+        </body>
+    </html>
+    """
+
+    sopa = BeautifulSoup(html_content, "html.parser")
+
     elementos_productos = sopa.find_all("div", class_="producto")
     elementos_precios = sopa.find_all("div", class_="precio")
 
